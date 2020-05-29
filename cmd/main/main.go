@@ -12,4 +12,5 @@ func main() {
 		c.String(http.StatusOK, "ok")
 	})
 
+	router.Run()
 }
