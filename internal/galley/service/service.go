@@ -1,11 +1,13 @@
 package service
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/skvoch/galley/internal/galley/model"
 	"github.com/skvoch/galley/internal/galley/repository"
 	"net/http"
+	"strconv"
 	"sync/atomic"
 )
 
@@ -44,6 +46,7 @@ type Service struct {
 
 func (s *Service) Setup() {
 	logrus.Info("Service: setup")
+	s.router.Use(cors.Default())
 
 	s.router.Handle(http.MethodPost, "/scream", s.HandlerScream)
 
@@ -54,7 +57,7 @@ func (s *Service) Setup() {
 	s.router.Handle(http.MethodPost, "/task/create", s.HandleTaskCreate)
 	s.router.Handle(http.MethodPost, "/task/change", s.HandleTaskChange)
 
-	s.router.Handle(http.MethodGet, "/clicks", s.HandleClicks)
+	s.router.Handle(http.MethodGet, "/clicks/:count", s.HandleClicks)
 	s.router.Handle(http.MethodPost, "/clicks/add", s.HandleAddClicks)
 
 	s.router.Handle(http.MethodPost, "/push/send", s.handlePushSend)
@@ -155,7 +158,23 @@ func (s *Service) HandleTaskCreate(ctx *gin.Context) {
 }
 
 func (s *Service) HandleClicks(ctx *gin.Context) {
-	ctx.String(http.StatusOK, "change task - not implemented yet")
+	count := ctx.Param("count")
+
+	count_int, err := strconv.Atoi(count)
+
+	if err != nil {
+		s.bindError(ctx, err)
+		return
+	}
+
+	stats, err := s.pg.Clicks().ReadLast(count_int)
+
+	if err != nil {
+		s.bindError(ctx, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, stats)
 }
 
 func (s *Service) HandleAddClicks(ctx *gin.Context) {
@@ -165,6 +184,8 @@ func (s *Service) HandleAddClicks(ctx *gin.Context) {
 		s.bindError(ctx, err)
 	}
 	ctx.String(http.StatusOK, "Clicks added")
+
+	s.pg.Clicks().Add(&stats)
 	logrus.Info("Hash: ", stats.Hash, " count: ", stats.Count)
 }
 

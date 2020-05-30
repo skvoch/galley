@@ -39,6 +39,8 @@ func (l *Logger) Run() error {
 	go l.checkPushes()
 	for {
 		count := <-l.scanner.GetCountChannel()
+
+		logrus.Info("Pressed keys count:", count)
 		l.client.SendStats(&model.ClickStats{
 			Count:  count,
 			Period: l.scanner.Duration.String(),
@@ -72,6 +74,7 @@ func (l *Logger) checkPushes() {
 
 		if push.Index != l.lastPush {
 			notify.Notify("Galley", "", push.Message, "/usr/local/opt/galley.png")
+			logrus.Info("Push: ", push.Message)
 
 			l.lastPush = push.Index
 		}

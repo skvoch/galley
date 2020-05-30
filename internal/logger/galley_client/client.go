@@ -9,8 +9,8 @@ import (
 
 func New() *Client {
 	return &Client{
-		//URL: "https://galley-jr6l7s7e6a-uc.a.run.app",
-		URL: "http://127.0.0.1:8080",
+		URL: "https://galley-jr6l7s7e6a-uc.a.run.app",
+		//URL: "http://127.0.0.1:8080",
 
 		Client: http.Client{},
 	}

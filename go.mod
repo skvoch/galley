@@ -7,6 +7,7 @@ require (
 	github.com/bmizerany/pq v0.0.0-20131128184720-da2b95e392c1
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb // indirect
 	github.com/eiannone/keyboard v0.0.0-20200508000154-caf4b762e807
+	github.com/gin-contrib/cors v1.3.1 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.6.0 // indirect

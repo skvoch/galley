@@ -29,9 +29,10 @@ func New() (*Repository, error) {
 }
 
 type Repository struct {
-	db    *sqlx.DB
-	board *BoardRepo
-	users *UserRepo
+	db     *sqlx.DB
+	board  *BoardRepo
+	users  *UserRepo
+	clicks *ClicksRepo
 }
 
 func (r *Repository) Board() *BoardRepo {
@@ -48,4 +49,12 @@ func (r *Repository) Users() *UserRepo {
 	}
 
 	return r.users
+}
+
+func (r *Repository) Clicks() *ClicksRepo {
+	if r.users == nil {
+		r.clicks = NewClicksRepo(r.db)
+	}
+
+	return r.clicks
 }
