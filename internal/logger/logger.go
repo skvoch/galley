@@ -2,6 +2,7 @@ package loggerьь
 
 import (
 	"encoding/hex"
+	"github.com/martinlindhe/notify"
 	"github.com/sirupsen/logrus"
 	"github.com/skvoch/galley/internal/galley/model"
 	"github.com/skvoch/galley/internal/logger/galley_client"
@@ -26,6 +27,8 @@ type Logger struct {
 	client  *galley_client.Client
 	user    *model.User
 	scanner *key_scanner.Scanner
+
+	lastPush int64
 }
 
 func (l *Logger) Run() error {
@@ -33,6 +36,7 @@ func (l *Logger) Run() error {
 		logrus.Error(err)
 	}
 
+	go l.checkPushes()
 	for {
 		count := <-l.scanner.GetCountChannel()
 		l.client.SendStats(&model.ClickStats{
@@ -51,4 +55,25 @@ func (l *Logger) handshake() error {
 	l.user.Hash = hash
 
 	return l.client.Handshake(l.user)
+}
+
+func (l *Logger) checkPushes() {
+	timer := time.NewTicker(time.Second * 1)
+
+	for {
+		<-timer.C
+
+		push, err := l.client.GetCurrentPush()
+
+		if err != nil {
+			logrus.Error(err)
+			continue
+		}
+
+		if push.Index != l.lastPush {
+			notify.Notify("Galley", "", push.Message, "/usr/local/opt/galley.png")
+
+			l.lastPush = push.Index
+		}
+	}
 }
