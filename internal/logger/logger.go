@@ -1,8 +1,7 @@
-package logger
+package loggerьь
 
 import (
 	"encoding/hex"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/skvoch/galley/internal/galley/model"
 	"github.com/skvoch/galley/internal/logger/galley_client"
@@ -10,7 +9,7 @@ import (
 	"time"
 )
 
-func New(firstName string, secondName string) *Logger {
+func New(firstName string, secondName string, duration time.Duration) *Logger {
 	return &Logger{
 		client: galley_client.New(),
 
@@ -19,7 +18,7 @@ func New(firstName string, secondName string) *Logger {
 			SecondName: secondName,
 		},
 
-		scanner: key_scanner.New(time.Second * 5),
+		scanner: key_scanner.New(duration),
 	}
 }
 
@@ -36,7 +35,11 @@ func (l *Logger) Run() error {
 
 	for {
 		count := <-l.scanner.GetCountChannel()
-		fmt.Println(count)
+		l.client.SendStats(&model.ClickStats{
+			Count:  count,
+			Period: l.scanner.Duration.String(),
+			Hash:   l.user.Hash,
+		})
 	}
 
 	return nil

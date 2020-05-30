@@ -19,6 +19,7 @@ func New(duration time.Duration) *Scanner {
 type Scanner struct {
 	countChannel chan int64
 	count        int64
+	Duration     time.Duration
 }
 
 func (s *Scanner) GetCountChannel() chan int64 {

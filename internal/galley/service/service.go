@@ -6,6 +6,7 @@ import (
 	"github.com/skvoch/galley/internal/galley/model"
 	"github.com/skvoch/galley/internal/galley/repository"
 	"net/http"
+	"sync/atomic"
 )
 
 func New() (*Service, error) {
@@ -21,12 +22,19 @@ func New() (*Service, error) {
 	return &Service{
 		pg:     pg,
 		router: gin.Default(),
+		pushMessages: []string{
+			"Греби быстрее, качественнее! быстрее!",
+			"Не переживай, ты не раб, точно точно. Мы же команда!",
+		},
 	}, nil
 }
 
 type Service struct {
 	pg     *repository.Repository
 	router *gin.Engine
+
+	pushIndex    int64
+	pushMessages []string
 }
 
 func (s *Service) Setup() {
@@ -43,6 +51,10 @@ func (s *Service) Setup() {
 
 	s.router.Handle(http.MethodGet, "/clicks", s.HandleClicks)
 	s.router.Handle(http.MethodPost, "/clicks/add", s.HandleAddClicks)
+
+	s.router.Handle(http.MethodPost, "/push/send", s.handlePushSend)
+	s.router.Handle(http.MethodGet, "/push/get", s.handlePushGet)
+
 }
 
 func (s *Service) Run() {
@@ -91,6 +103,8 @@ func (s *Service) HandleRegister(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "User created")
 		}
 	}
+
+	ctx.String(http.StatusOK, "Registered")
 }
 
 func (s *Service) HandlerBoard(ctx *gin.Context) {
@@ -140,10 +154,33 @@ func (s *Service) HandleClicks(ctx *gin.Context) {
 }
 
 func (s *Service) HandleAddClicks(ctx *gin.Context) {
-	ctx.String(http.StatusOK, "change task - not implemented yet")
+	stats := model.ClickStats{}
+
+	if err := ctx.BindJSON(&stats); err != nil {
+		s.bindError(ctx, err)
+	}
+	ctx.String(http.StatusOK, "Clicks added")
+	logrus.Info("Hash: ", stats.Hash, " count: ", stats.Count)
 }
 
 func (s *Service) bindError(ctx *gin.Context, err error) {
 	ctx.String(http.StatusInternalServerError, err.Error())
 	ctx.Abort()
+}
+
+func (s *Service) handlePushSend(ctx *gin.Context) {
+	atomic.AddInt64(&s.pushIndex, 1)
+
+	ctx.String(http.StatusOK, "OK")
+}
+
+func (s *Service) handlePushGet(ctx *gin.Context) {
+	push := model.Push{
+		Index: atomic.LoadInt64(&s.pushIndex),
+	}
+
+	l := int64(len(s.pushMessages))
+	push.Message = s.pushMessages[push.Index%l]
+
+	ctx.JSON(http.StatusOK, push)
 }

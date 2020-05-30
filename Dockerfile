@@ -1,5 +1,6 @@
-FROM golang:1.12 as build
+FROM golang:1.14-alpine as build
 WORKDIR /go/src/app
+RUN apk add --no-cache build-base && apk add --no-cache libx11-dev &&  apk add --no-cache libxkbcommon-dev && apk add --no-cache libxtst-dev
 COPY . .
 ENV GO111MODULE on
 RUN go get ./...
