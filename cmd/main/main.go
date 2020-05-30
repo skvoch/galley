@@ -3,7 +3,7 @@ package main
 import (
 	_ "github.com/bmizerany/pq"
 	"github.com/sirupsen/logrus"
-	"github.com/skvoch/galley/internal/service"
+	"github.com/skvoch/galley/internal/galley/service"
 )
 
 func main() {

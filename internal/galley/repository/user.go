@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/skvoch/galley/internal/model"
+	"github.com/skvoch/galley/internal/galley/model"
 )
 
 func NewUserRepo(db *sqlx.DB) *UserRepo {

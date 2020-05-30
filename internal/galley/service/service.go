@@ -3,8 +3,8 @@ package service
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/skvoch/galley/internal/model"
-	"github.com/skvoch/galley/internal/repository"
+	"github.com/skvoch/galley/internal/galley/model"
+	"github.com/skvoch/galley/internal/galley/repository"
 	"net/http"
 )
 
