@@ -1,16 +1,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
+	_ "github.com/bmizerany/pq"
+	"github.com/sirupsen/logrus"
+	"github.com/skvoch/galley/internal/service"
 )
 
 func main() {
-	
-	router := gin.Default()
-	router.Handle("GET","/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "ok")
-	})
+	s, err := service.New()
 
-	router.Run()
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	s.Setup()
+	s.Run()
 }
